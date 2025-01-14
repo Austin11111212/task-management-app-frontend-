@@ -7,8 +7,8 @@ const TaskCard = ({ task, fetchAllTasks }) => {
         title: task.title,
         description: task.description,
         deadline: task.deadline,
-        status: task.status,
-        priority: task.priority,
+        status: task.status || 'in progress', // Default to 'in progress' if no status
+        priority: task.priority || 'medium', // Default to 'medium' if no priority
     });
 
     // Helper to get token from localStorage
@@ -26,11 +26,11 @@ const TaskCard = ({ task, fetchAllTasks }) => {
             await api.delete(`/tasks/${task._id}`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
-            alert('Task deleted successfully'); // Alert on success
+            alert('Task deleted successfully');
             fetchAllTasks(); // Refresh task list
         } catch (error) {
             console.error('Failed to delete task:', error.response?.data?.message || error.message);
-            alert('Failed to delete task: ' + (error.response?.data?.message || error.message)); // Alert on failure
+            alert('Failed to delete task: ' + (error.response?.data?.message || error.message));
         }
     };
 
@@ -51,12 +51,12 @@ const TaskCard = ({ task, fetchAllTasks }) => {
             await api.put(`/tasks/${task._id}`, updatedData, {
                 headers: { Authorization: `Bearer ${token}` },
             });
-            alert('Task updated successfully'); // Alert on success
+            alert('Task updated successfully');
             fetchAllTasks(); // Refresh task list
             setIsEditing(false); // Exit editing mode
         } catch (error) {
             console.error('Failed to update task:', error.response?.data?.message || error.message);
-            alert('Failed to update task: ' + (error.response?.data?.message || error.message)); // Alert on failure
+            alert('Failed to update task: ' + (error.response?.data?.message || error.message));
         }
     };
 
