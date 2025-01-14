@@ -13,17 +13,23 @@ const RegisterPage = () => {
     const [passwordVisible, setPasswordVisible] = useState(false);
     const navigate = useNavigate();
 
+    // Form change handler
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setFormData({ ...formData, [name]: value });
+        setFormData((prevData) => ({
+            ...prevData,
+            [name]: value,
+        }));
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
+            // Attempt to register the user
             await registerUser(formData);
             navigate('/login'); // Redirect to login page after successful registration
         } catch (err) {
+            // Handle error in registration
             setError(err.response?.data?.message || 'Registration failed');
         }
     };

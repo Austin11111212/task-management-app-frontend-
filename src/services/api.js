@@ -1,46 +1,138 @@
 import axios from 'axios';
 
-// Create an Axios instance with base URL
-const API = axios.create({ baseURL: 'http://localhost:5000/api' });
+// Base URL of your API
+const api = axios.create({
+  baseURL: 'http://localhost:5000/api',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
 
-// Attach token to headers for authenticated requests
-API.interceptors.request.use(
-    (req) => {
-        const token = localStorage.getItem('token');
-        if (token) {
-            req.headers.Authorization = `Bearer ${token}`;
-        }
-        return req;
-    },
-    (error) => {
-        return Promise.reject(error); // Handle request errors
+// Helper to get token from localStorage
+const getToken = () => {
+  const user = JSON.parse(localStorage.getItem('user'));
+  return user?.token || null;
+};
+
+// Register User
+export const registerUser = async (userData) => {
+  try {
+    // Use the `api` instance here
+    const response = await api.post('/users/register', userData);
+    console.log('Registration successful:', response.data);
+    return response.data; // Return response data if needed
+  } catch (error) {
+    console.error('Registration error:', error.response ? error.response.data : error.message);
+    throw new Error(error.response ? error.response.data.message : error.message); // Provide better error details
+  }
+};
+
+// Login User
+export const loginUser = async (email, password) => {
+  try {
+    // Make the API request using the 'api' instance
+    const response = await api.post('/users/login', { email, password });
+
+    // Check if the response contains a token
+    if (response && response.data && response.data.token) {
+      const token = response.data.token; // Extract token from the response
+      localStorage.setItem('user', JSON.stringify({ token })); // Store the token in localStorage
+      console.log('Token saved to localStorage:', token);
+
+      return response.data; // Return the response data
+    } else {
+      // If token is missing in the response
+      console.error('Login response does not contain a token');
+      throw new Error('Login failed: No token received');
     }
-);
-
-// Handle responses and errors globally
-API.interceptors.response.use(
-    (response) => response,
-    (error) => {
-        if (error.response) {
-            // The request was made and the server responded with a status code that falls out of the range of 2xx
-            console.error('API Error:', error.response.data.message || error.response.statusText);
-        } else if (error.request) {
-            // The request was made but no response was received
-            console.error('No response received:', error.message);
-        } else {
-            // Something happened in setting up the request that triggered an error
-            console.error('Request Error:', error.message);
-        }
-        return Promise.reject(error);
+  } catch (error) {
+    // Log the error if there is an issue with the API request
+    if (error.response) {
+      // If there's a response from the server, log the server's error message
+      console.error('Login error:', error.response?.data?.message || error.message);
+      throw new Error(error.response?.data?.message || 'An error occurred during login');
+    } else {
+      // Handle network errors or other issues that are not from the server
+      console.error('Login error:', error.message);
+      throw new Error('Login failed: ' + error.message);
     }
-);
+  }
+};
 
-// API functions for users
-export const registerUser = (data) => API.post('/users/register', data);
-export const loginUser = (data) => API.post('/users/login', data);
+// Fetch Tasks
+export const fetchTasks = async () => {
+  const token = getToken();
+  if (!token) throw new Error('No token found');
 
-// API functions for tasks
-export const fetchTasks = () => API.get('/tasks');
-export const createTask = (data) => API.post('/tasks', data);
-export const updateTask = (id, data) => API.put(`/tasks/${id}`, data); // Updated task
-export const deleteTask = (id) => API.delete(`/tasks/${id}`); // Delete task
+  try {
+    // Use the `api` instance to make requests
+    const response = await api.get('/tasks', {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Fetch tasks error:', error.response?.data?.message || error.message);
+    throw error;
+  }
+};
+
+// Create Task
+export const createTask = async (taskData) => {
+  const token = getToken();
+  if (!token) throw new Error('No token found');
+
+  try {
+    // Use the `api` instance to make requests
+    const response = await api.post('/tasks', taskData, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Create task error:', error.response?.data?.message || error.message);
+    throw error;
+  }
+};
+
+// Update Task
+export const updateTask = async (taskId, taskData) => {
+  const token = getToken();
+  if (!token) throw new Error('No token found');
+
+  try {
+    // Use the `api` instance to make requests
+    const response = await api.put(`/tasks/${taskId}`, taskData, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Update task error:', error.response?.data?.message || error.message);
+    throw error;
+  }
+};
+
+// Delete Task
+export const deleteTask = async (taskId) => {
+  const token = getToken();
+  if (!token) throw new Error('No token found');
+
+  try {
+    // Use the `api` instance to make requests
+    const response = await api.delete(`/tasks/${taskId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Delete task error:', error.response?.data?.message || error.message);
+    throw error;
+  }
+};
+
+export default api;
