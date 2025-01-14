@@ -1,16 +1,15 @@
-// HomePage.jsx
 import React, { useState, useEffect } from 'react';
 import { fetchTasks, createTask } from '../services/api';
-import TaskCard from '../components/TaskCard';
+import TaskCard from '../components/TaskCard'; // Import TaskCard component
 
 const HomePage = () => {
     const [tasks, setTasks] = useState([]);
     const [newTask, setNewTask] = useState({
         title: '',
         description: '',
-        deadline: '', // Date format: 'YYYY-MM-DD'
+        deadline: '',  // Date format: 'YYYY-MM-DD'
         status: 'in progress',
-        priority: 'low',
+        priority: 'low'
     });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
@@ -55,15 +54,78 @@ const HomePage = () => {
         fetchAllTasks(); // Initial task fetch
     }, []);
 
+    const styles = {
+        container: {
+            padding: '2rem',
+            fontFamily: 'Arial, sans-serif',
+            backgroundColor: '#f4f4f4',
+            maxWidth: '1200px',
+            margin: '0 auto',
+        },
+        heading: {
+            textAlign: 'center',
+            marginBottom: '1.5rem',
+            color: '#333',
+        },
+        form: {
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            marginBottom: '1rem',
+            gap: '0.5rem',
+        },
+        input: {
+            padding: '10px',
+            marginRight: '10px',
+            borderRadius: '4px',
+            border: '1px solid #ccc',
+            fontSize: '1rem',
+            width: '100%',
+            maxWidth: '400px',
+        },
+        select: {
+            padding: '10px',
+            marginRight: '10px',
+            borderRadius: '4px',
+            border: '1px solid #ccc',
+            fontSize: '1rem',
+            width: '100%',
+            maxWidth: '400px',
+        },
+        button: {
+            padding: '10px 20px',
+            backgroundColor: '#007bff',
+            color: '#fff',
+            border: 'none',
+            borderRadius: '4px',
+            cursor: 'pointer',
+            maxWidth: '400px',
+            width: '100%',
+        },
+        error: {
+            color: 'red',
+            textAlign: 'center',
+        },
+        taskList: {
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+            gap: '1rem',
+        },
+        loading: {
+            textAlign: 'center',
+            fontSize: '1.2rem',
+        },
+    };
+
     return (
-        <div style={{ padding: '2rem', backgroundColor: '#f4f4f4' }}>
-            <h1 style={{ textAlign: 'center', marginBottom: '1.5rem', color: '#333' }}>Task Management</h1>
+        <div style={styles.container}>
+            <h1 style={styles.heading}>Task Management</h1>
 
             {/* Display error if any */}
-            {error && <p style={{ color: 'red', textAlign: 'center' }}>{error}</p>}
+            {error && <p style={styles.error}>{error}</p>}
 
             {/* Task creation form */}
-            <form onSubmit={createNewTask} style={{ display: 'flex', justifyContent: 'center', marginBottom: '1rem' }}>
+            <form onSubmit={createNewTask} style={styles.form}>
                 <input
                     type="text"
                     placeholder="Task Title"
@@ -71,7 +133,7 @@ const HomePage = () => {
                     onChange={handleChange}
                     name="title"
                     required
-                    style={{ padding: '10px', marginRight: '10px', borderRadius: '4px', border: '1px solid #ccc' }}
+                    style={styles.input}
                 />
                 <input
                     type="text"
@@ -79,42 +141,42 @@ const HomePage = () => {
                     value={newTask.description}
                     onChange={handleChange}
                     name="description"
-                    style={{ padding: '10px', marginRight: '10px', borderRadius: '4px', border: '1px solid #ccc' }}
+                    style={styles.input}
                 />
                 <input
                     type="date"
                     value={newTask.deadline}
                     onChange={handleChange}
                     name="deadline"
-                    style={{ padding: '10px', marginRight: '10px', borderRadius: '4px', border: '1px solid #ccc' }}
+                    style={styles.input}
                 />
                 <select
-                    name="status"
                     value={newTask.status}
                     onChange={handleChange}
-                    style={{ padding: '10px', marginRight: '10px', borderRadius: '4px', border: '1px solid #ccc' }}
+                    name="status"
+                    style={styles.select}
                 >
                     <option value="in progress">In Progress</option>
                     <option value="completed">Completed</option>
                 </select>
                 <select
-                    name="priority"
                     value={newTask.priority}
                     onChange={handleChange}
-                    style={{ padding: '10px', marginRight: '10px', borderRadius: '4px', border: '1px solid #ccc' }}
+                    name="priority"
+                    style={styles.select}
                 >
                     <option value="low">Low</option>
                     <option value="medium">Medium</option>
                     <option value="high">High</option>
                 </select>
-                <button type="submit" style={{ padding: '10px 20px', backgroundColor: '#007bff', color: '#fff', border: 'none', borderRadius: '4px' }}>Add Task</button>
+                <button type="submit" style={styles.button}>Add Task</button>
             </form>
 
             {/* Display tasks */}
             {loading ? (
-                <p>Loading tasks...</p>
+                <p style={styles.loading}>Loading tasks...</p>
             ) : (
-                <div>
+                <div style={styles.taskList}>
                     {tasks.length === 0 ? (
                         <p>No tasks found</p>
                     ) : (

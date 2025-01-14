@@ -7,8 +7,8 @@ const TaskCard = ({ task, fetchAllTasks }) => {
         title: task.title,
         description: task.description,
         deadline: task.deadline,
-        status: task.status || 'in progress', // Default to 'in progress' if no status
-        priority: task.priority || 'medium', // Default to 'medium' if no priority
+        status: task.status,
+        priority: task.priority,
     });
 
     // Helper to get token from localStorage
@@ -66,7 +66,7 @@ const TaskCard = ({ task, fetchAllTasks }) => {
     };
 
     return (
-        <div style={{ border: '1px solid #ccc', padding: '1rem', marginBottom: '1rem' }}>
+        <div style={styles.card}>
             {isEditing ? (
                 // Edit Task Form
                 <div>
@@ -76,24 +76,24 @@ const TaskCard = ({ task, fetchAllTasks }) => {
                         value={updatedTask.title}
                         onChange={(e) => handleInputChange('title', e.target.value)}
                         placeholder="Task title"
-                        style={{ width: '100%', marginBottom: '0.5rem', padding: '0.5rem' }}
+                        style={styles.input}
                     />
                     <textarea
                         value={updatedTask.description}
                         onChange={(e) => handleInputChange('description', e.target.value)}
                         placeholder="Task description"
-                        style={{ width: '100%', marginBottom: '0.5rem', padding: '0.5rem' }}
+                        style={styles.textarea}
                     />
                     <input
                         type="date"
                         value={updatedTask.deadline}
                         onChange={(e) => handleInputChange('deadline', e.target.value)}
-                        style={{ width: '100%', marginBottom: '0.5rem', padding: '0.5rem' }}
+                        style={styles.input}
                     />
                     <select
                         value={updatedTask.status}
                         onChange={(e) => handleInputChange('status', e.target.value)}
-                        style={{ width: '100%', marginBottom: '0.5rem', padding: '0.5rem' }}
+                        style={styles.select}
                     >
                         <option value="in progress">In Progress</option>
                         <option value="completed">Completed</option>
@@ -101,27 +101,16 @@ const TaskCard = ({ task, fetchAllTasks }) => {
                     <select
                         value={updatedTask.priority}
                         onChange={(e) => handleInputChange('priority', e.target.value)}
-                        style={{ width: '100%', marginBottom: '0.5rem', padding: '0.5rem' }}
+                        style={styles.select}
                     >
                         <option value="low">Low</option>
                         <option value="medium">Medium</option>
                         <option value="high">High</option>
                     </select>
-                    <button
-                        onClick={updateTaskHandler}
-                        style={{
-                            backgroundColor: 'green',
-                            color: '#fff',
-                            padding: '0.5rem',
-                            marginRight: '0.5rem',
-                        }}
-                    >
+                    <button onClick={updateTaskHandler} style={styles.saveButton}>
                         Save Changes
                     </button>
-                    <button
-                        onClick={() => setIsEditing(false)}
-                        style={{ backgroundColor: 'gray', color: '#fff', padding: '0.5rem' }}
-                    >
+                    <button onClick={() => setIsEditing(false)} style={styles.cancelButton}>
                         Cancel
                     </button>
                 </div>
@@ -133,27 +122,109 @@ const TaskCard = ({ task, fetchAllTasks }) => {
                     <p><strong>Deadline:</strong> {task.deadline}</p>
                     <p><strong>Status:</strong> {task.status}</p>
                     <p><strong>Priority:</strong> {task.priority}</p>
-                    <button
-                        onClick={deleteTask}
-                        style={{
-                            backgroundColor: 'red',
-                            color: '#fff',
-                            padding: '0.5rem',
-                            marginRight: '0.5rem',
-                        }}
-                    >
+                    <button onClick={deleteTask} style={styles.deleteButton}>
                         Delete
                     </button>
-                    <button
-                        onClick={() => setIsEditing(true)}
-                        style={{ backgroundColor: 'blue', color: '#fff', padding: '0.5rem' }}
-                    >
+                    <button onClick={() => setIsEditing(true)} style={styles.updateButton}>
                         Update
                     </button>
                 </div>
             )}
         </div>
     );
+};
+
+// Styles with responsiveness
+const styles = {
+    card: {
+        border: '1px solid #ccc',
+        padding: '1rem',
+        marginBottom: '1rem',
+        backgroundColor: '#fff',
+        borderRadius: '8px',
+        transition: 'transform 0.3s ease',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'flex-start',
+    },
+    input: {
+        width: '100%',
+        padding: '10px',
+        marginBottom: '10px',
+        borderRadius: '4px',
+        border: '1px solid #ccc',
+        fontSize: '1rem',
+    },
+    textarea: {
+        width: '100%',
+        padding: '10px',
+        marginBottom: '10px',
+        borderRadius: '4px',
+        border: '1px solid #ccc',
+        fontSize: '1rem',
+        height: '100px',
+    },
+    select: {
+        width: '100%',
+        padding: '10px',
+        marginBottom: '10px',
+        borderRadius: '4px',
+        border: '1px solid #ccc',
+        fontSize: '1rem',
+    },
+    saveButton: {
+        padding: '10px 20px',
+        backgroundColor: 'green',
+        color: '#fff',
+        border: 'none',
+        borderRadius: '4px',
+        cursor: 'pointer',
+        width: '100%',
+    },
+    cancelButton: {
+        padding: '10px 20px',
+        backgroundColor: 'gray',
+        color: '#fff',
+        border: 'none',
+        borderRadius: '4px',
+        cursor: 'pointer',
+        width: '100%',
+    },
+    deleteButton: {
+        backgroundColor: 'red',
+        color: '#fff',
+        padding: '10px 20px',
+        borderRadius: '4px',
+        border: 'none',
+        cursor: 'pointer',
+        marginRight: '10px',
+        width: '100%',
+    },
+    updateButton: {
+        backgroundColor: 'blue',
+        color: '#fff',
+        padding: '10px 20px',
+        borderRadius: '4px',
+        border: 'none',
+        cursor: 'pointer',
+        width: '100%',
+    },
+};
+
+// Media Queries for Responsiveness
+const mediaQueries = {
+    '@media (min-width: 768px)': {
+        card: {
+            width: '48%',
+            marginRight: '2%',
+        },
+    },
+    '@media (min-width: 1024px)': {
+        card: {
+            width: '30%',
+            marginRight: '2%',
+        },
+    },
 };
 
 export default TaskCard;
