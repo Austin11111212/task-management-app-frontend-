@@ -113,7 +113,7 @@ const Header = () => {
                     onMouseOver={(e) => (e.target.style.color = styles.linkHover.color)}
                     onMouseOut={(e) => (e.target.style.color = isDarkMode ? '#fff' : '#000')}
                 >
-                    Home
+                    {/* Home */}
                 </Link>
                 {username && (
                     <span style={styles.welcomeMessage}>
