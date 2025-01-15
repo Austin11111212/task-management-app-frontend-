@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FaSun, FaMoon } from 'react-icons/fa'; // Import icons
-
+import TaskManagerIcon from '../assets/images/I3KMfEQsQgihD17Fiu9q-VJaq5NyLQ-7_PTh-uPm1Qk.webp'; // Import the image
 
 const Header = () => {
     const navigate = useNavigate();
@@ -43,9 +43,15 @@ const Header = () => {
             boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)',
         },
         logo: {
-            fontSize: '1.5rem',
-            fontWeight: 'bold',
+            display: 'flex',
+            alignItems: 'center',
             cursor: 'pointer',
+            textDecoration: 'none',
+        },
+        logoImage: {
+            width: '40px',
+            height: '40px',
+            marginRight: '0.5rem',
         },
         nav: {
             display: 'flex',
@@ -91,15 +97,15 @@ const Header = () => {
 
     return (
         <header style={styles.header}>
-            
-
-          
-            <div style={styles.logo}>
-                <Link to="/" style={{ textDecoration: 'none', color: 'inherit' }}>
+            {/* Task Manager Logo */}
+            <Link to="/" style={styles.logo} title="Go to Home Page">
+                <img src={TaskManagerIcon} alt="Task Manager Icon" style={styles.logoImage} />
+                <span style={{ color: isDarkMode ? '#fff' : '#000', fontWeight: 'bold' }}>
                     Task Manager
-                </Link>
-            </div>
+                </span>
+            </Link>
 
+            {/* Navigation Links */}
             <nav style={styles.nav}>
                 <Link
                     to="/"

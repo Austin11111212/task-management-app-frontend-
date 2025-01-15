@@ -5,7 +5,7 @@ import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import Header from './components/Header';
 import AddTaskPage from './pages/AddTaskPage';
-
+import Footer from './components/Footer';
 // import Navbar from './components/Navbar';
 
 const App = () => {
@@ -22,6 +22,7 @@ const App = () => {
                     <Route path="/login" element={<LoginPage />} />
                     <Route path="/register" element={<RegisterPage />} />
                 </Routes>
+                <Footer />
             </div>
         </Router>
     );

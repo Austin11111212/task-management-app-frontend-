@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import TaskCard from '../components/TaskCard';
 
+
 const HomePage = () => {
     const [tasks, setTasks] = useState([]);
     const [loading, setLoading] = useState(true);
