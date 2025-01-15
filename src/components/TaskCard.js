@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import api from '../services/api'; // Ensure correct path to your api file
 
-const TaskCard = ({ task, fetchAllTasks }) => {
+const TaskCard = ({ task, fetchAllTasks, isDarkMode }) => {
     const [isEditing, setIsEditing] = useState(false);
     const [updatedTask, setUpdatedTask] = useState({
         title: task.title,
@@ -66,7 +66,13 @@ const TaskCard = ({ task, fetchAllTasks }) => {
     };
 
     return (
-        <div style={styles.card}>
+        <div
+            style={{
+                ...styles.card,
+                backgroundColor: isDarkMode ? '#333' : '#fff',
+                color: isDarkMode ? '#fff' : '#000',
+            }}
+        >
             {isEditing ? (
                 // Edit Task Form
                 <div>
@@ -134,15 +140,14 @@ const TaskCard = ({ task, fetchAllTasks }) => {
     );
 };
 
-// Styles with responsiveness
+// Styles
 const styles = {
     card: {
         border: '1px solid #ccc',
         padding: '1rem',
         marginBottom: '1rem',
-        backgroundColor: '#fff',
         borderRadius: '8px',
-        transition: 'transform 0.3s ease',
+        transition: 'transform 0.3s ease, background-color 0.3s ease',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'flex-start',
@@ -208,22 +213,6 @@ const styles = {
         border: 'none',
         cursor: 'pointer',
         width: '100%',
-    },
-};
-
-// Media Queries for Responsiveness
-const mediaQueries = {
-    '@media (min-width: 768px)': {
-        card: {
-            width: '48%',
-            marginRight: '2%',
-        },
-    },
-    '@media (min-width: 1024px)': {
-        card: {
-            width: '30%',
-            marginRight: '2%',
-        },
     },
 };
 
