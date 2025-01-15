@@ -112,6 +112,16 @@ const LoginPage = () => {
             textAlign: 'center',
             marginTop: '1rem',
         },
+        signUpText: {
+            textAlign: 'center',
+            marginTop: '1rem',
+            fontSize: '0.9rem',
+        },
+        signUpLink: {
+            color: '#007bff',
+            cursor: 'pointer',
+            textDecoration: 'none',
+        }
     };
 
     return (
@@ -168,6 +178,16 @@ const LoginPage = () => {
                 </button>
 
                 {isLoading && <p style={styles.loadingText}>Please wait...</p>}
+
+                <div style={styles.signUpText}>
+                    <span>Don't have an account? </span>
+                    <span 
+                        style={styles.signUpLink} 
+                        onClick={() => navigate('/register')} // Navigate to the registration page
+                    >
+                        Sign up
+                    </span>
+                </div>
             </form>
         </div>
     );
