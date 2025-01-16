@@ -1,8 +1,8 @@
 import axios from 'axios';
 
-// Use the base URL from environment variables
+// Use the base URL for the deployed backend
 const api = axios.create({
-  baseURL: process.env.REACT_APP_API_URL || 'http://localhost:5000/api', // Fallback to localhost in development
+  baseURL: 'https://tast-management-app-backend.onrender.com/api', // Deployed backend URL
   headers: {
     'Content-Type': 'application/json',
   },
@@ -17,42 +17,35 @@ const getToken = () => {
 // Register User
 export const registerUser = async (userData) => {
   try {
-    // Use the `api` instance here
     const response = await api.post('/users/register', userData);
     console.log('Registration successful:', response.data);
-    return response.data; // Return response data if needed
+    return response.data;
   } catch (error) {
     console.error('Registration error:', error.response ? error.response.data : error.message);
-    throw new Error(error.response ? error.response.data.message : error.message); // Provide better error details
+    throw new Error(error.response ? error.response.data.message : error.message);
   }
 };
 
 // Login User
 export const loginUser = async (email, password) => {
   try {
-    // Make the API request using the 'api' instance
     const response = await api.post('/users/login', { email, password });
 
-    // Check if the response contains a token
     if (response && response.data && response.data.token) {
-      const token = response.data.token; // Extract token from the response
-      localStorage.setItem('user', JSON.stringify({ token })); // Store the token in localStorage
+      const token = response.data.token;
+      localStorage.setItem('user', JSON.stringify({ token }));
       console.log('Token saved to localStorage:', token);
 
-      return response.data; // Return the response data
+      return response.data;
     } else {
-      // If token is missing in the response
       console.error('Login response does not contain a token');
       throw new Error('Login failed: No token received');
     }
   } catch (error) {
-    // Log the error if there is an issue with the API request
     if (error.response) {
-      // If there's a response from the server, log the server's error message
       console.error('Login error:', error.response?.data?.message || error.message);
       throw new Error(error.response?.data?.message || 'An error occurred during login');
     } else {
-      // Handle network errors or other issues that are not from the server
       console.error('Login error:', error.message);
       throw new Error('Login failed: ' + error.message);
     }
@@ -65,7 +58,6 @@ export const fetchTasks = async () => {
   if (!token) throw new Error('No token found');
 
   try {
-    // Use the `api` instance to make requests
     const response = await api.get('/tasks', {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -84,7 +76,6 @@ export const createTask = async (taskData) => {
   if (!token) throw new Error('No token found');
 
   try {
-    // Use the `api` instance to make requests
     const response = await api.post('/tasks', taskData, {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -103,7 +94,6 @@ export const updateTask = async (taskId, taskData) => {
   if (!token) throw new Error('No token found');
 
   try {
-    // Use the `api` instance to make requests
     const response = await api.put(`/tasks/${taskId}`, taskData, {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -122,7 +112,6 @@ export const deleteTask = async (taskId) => {
   if (!token) throw new Error('No token found');
 
   try {
-    // Use the `api` instance to make requests
     const response = await api.delete(`/tasks/${taskId}`, {
       headers: {
         Authorization: `Bearer ${token}`,
