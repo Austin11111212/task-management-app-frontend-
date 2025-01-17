@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import TaskCard from '../components/TaskCard';
+import { FaBell, FaSearch } from 'react-icons/fa'; // Icons for search and notifications
+import { toast } from 'react-toastify'; // Toast for notifications
 
 const HomePage = () => {
     const [tasks, setTasks] = useState([]);
@@ -11,6 +13,7 @@ const HomePage = () => {
     const [sortCriteria, setSortCriteria] = useState('');
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [darkMode, setDarkMode] = useState(false); // Dark mode state
     const navigate = useNavigate();
 
     const fetchAllTasks = async () => {
@@ -26,7 +29,7 @@ const HomePage = () => {
                 headers: { Authorization: `Bearer ${token}` },
             });
             setTasks(response.data);
-            setFilteredTasks(response.data); // Initialize filtered tasks
+            setFilteredTasks(response.data);
         } catch (err) {
             setError(err.message);
         } finally {
@@ -38,7 +41,6 @@ const HomePage = () => {
         fetchAllTasks();
     }, []);
 
-    // Filter tasks by search term and status
     useEffect(() => {
         let filtered = tasks;
 
@@ -60,7 +62,7 @@ const HomePage = () => {
                     return new Date(a.deadline) - new Date(b.deadline);
                 }
                 if (sortCriteria === 'priority') {
-                    return b.priority - a.priority; // Assuming priority is a number
+                    return b.priority - a.priority;
                 }
                 return 0;
             });
@@ -73,17 +75,28 @@ const HomePage = () => {
         navigate('/add-task'); // Redirect to add-task page
     };
 
+    const toggleDarkMode = () => {
+        setDarkMode(!darkMode);
+    };
+
+    // Dark mode styles
+    const pageStyles = darkMode ? {
+        backgroundColor: '#2E2E2E',
+        color: '#FFF',
+    } : {
+        backgroundColor: '#f4f4f4',
+        color: '#333',
+    };
+
     return (
-        <div style={{
-            padding: '1rem',
-            maxWidth: '1200px',
-            margin: '0 auto',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-        }}>
+        <div style={{ padding: '1rem', maxWidth: '1200px', margin: '0 auto', ...pageStyles }}>
             <h1 style={{ textAlign: 'center', marginBottom: '1rem' }}>Task Management</h1>
             
+            {/* Dark Mode Toggle Button */}
+            <button onClick={toggleDarkMode} style={{ padding: '0.5rem', marginBottom: '1rem' }}>
+                {darkMode ? 'Light Mode' : 'Dark Mode'}
+            </button>
+
             {/* Search, Filter, and Sort Controls */}
             <div style={{ marginBottom: '1rem', display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
                 <input
@@ -129,39 +142,18 @@ const HomePage = () => {
             </button>
 
             {loading ? (
-                // Spinner while loading
-                <div style={{
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    height: '200px',
-                }}>
-                    <div style={{
-                        border: '4px solid rgba(0, 0, 0, 0.1)',
-                        width: '36px',
-                        height: '36px',
-                        borderRadius: '50%',
-                        borderLeftColor: '#007BFF',
-                        animation: 'spin 1s linear infinite',
-                    }} />
-                    <style>
-                        {`@keyframes spin {
-                            0% { transform: rotate(0deg); }
-                            100% { transform: rotate(360deg); }
-                        }`}
-                    </style>
+                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '200px' }}>
+                    <div style={{ border: '4px solid rgba(0, 0, 0, 0.1)', width: '36px', height: '36px', borderRadius: '50%', borderLeftColor: '#007BFF', animation: 'spin 1s linear infinite' }} />
                 </div>
             ) : error ? (
                 <p style={{ color: 'red' }}>{error}</p>
             ) : filteredTasks.length === 0 ? (
-                <p>No tasks found. Adjust your filters or search criteria.</p>
+                <div>
+                    <p>No tasks found. Adjust your filters or search criteria.</p>
+                    <button onClick={handleAddTaskClick}>Create Your First Task</button>
+                </div>
             ) : (
-                <div style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-                    gap: '1rem',
-                    width: '100%',
-                }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1rem', width: '100%' }}>
                     {filteredTasks.map((task) => (
                         <TaskCard key={task._id} task={task} fetchAllTasks={fetchAllTasks} />
                     ))}

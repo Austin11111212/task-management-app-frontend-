@@ -4,6 +4,7 @@ import api from '../services/api'; // Ensure correct path to your api file
 const TaskCard = ({ task, fetchAllTasks, isDarkMode }) => {
     const [isEditing, setIsEditing] = useState(false);
     const [updatedTask, setUpdatedTask] = useState({ ...task });
+    const [isCompleted, setIsCompleted] = useState(task.status === 'completed');
 
     // Helper to get token from localStorage
     const getToken = () => {
@@ -59,6 +60,28 @@ const TaskCard = ({ task, fetchAllTasks, isDarkMode }) => {
     // Handle input changes
     const handleInputChange = (field, value) => {
         setUpdatedTask((prev) => ({ ...prev, [field]: value }));
+    };
+
+    // Handle task completion toggle
+    const toggleCompletion = async () => {
+        try {
+            const token = getToken();
+            if (!token) throw new Error('No token, authorization denied');
+
+            // Toggle the task completion status (from 'in progress' to 'completed' or vice versa)
+            const updatedStatus = isCompleted ? 'in progress' : 'completed';
+            setIsCompleted(!isCompleted);  // Toggle the state locally for immediate UI update
+
+            // Update task status on the backend
+            await api.put(`/tasks/${task._id}`, { ...task, status: updatedStatus }, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+
+            fetchAllTasks(); // Refresh task list after updating
+        } catch (error) {
+            console.error('Failed to update task status:', error);
+            alert('Failed to update task status');
+        }
     };
 
     const styles = {
@@ -120,6 +143,26 @@ const TaskCard = ({ task, fetchAllTasks, isDarkMode }) => {
             backgroundColor: 'blue',
             color: '#fff',
         },
+        priorityBadge: {
+            padding: '0.5rem',
+            borderRadius: '5px',
+            fontWeight: 'bold',
+            color: '#fff',
+            display: 'inline-block',
+            marginTop: '0.5rem',
+        },
+        highPriority: {
+            backgroundColor: 'red',
+        },
+        mediumPriority: {
+            backgroundColor: 'yellow',
+        },
+        lowPriority: {
+            backgroundColor: 'green',
+        },
+        completedCheckbox: {
+            cursor: 'pointer',
+        },
     };
 
     return (
@@ -176,7 +219,22 @@ const TaskCard = ({ task, fetchAllTasks, isDarkMode }) => {
                     <p>{task.description}</p>
                     <p><strong>Deadline:</strong> {formatDate(task.deadline)}</p>
                     <p><strong>Status:</strong> {task.status}</p>
-                    <p><strong>Priority:</strong> {task.priority}</p>
+                    <p><strong>Priority:</strong> 
+                        <span 
+                            style={{
+                                ...styles.priorityBadge, 
+                                ...(task.priority === 'high' ? styles.highPriority : task.priority === 'medium' ? styles.mediumPriority : styles.lowPriority)
+                            }}
+                        >
+                            {task.priority}
+                        </span>
+                    </p>
+                    <input 
+                        type="checkbox" 
+                        checked={isCompleted} 
+                        onChange={toggleCompletion} 
+                        style={styles.completedCheckbox} 
+                    /> Mark as Completed
                     <button onClick={deleteTask} style={{ ...styles.button, ...styles.deleteButton }}>
                         Delete
                     </button>
