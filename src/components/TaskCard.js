@@ -3,13 +3,7 @@ import api from '../services/api'; // Ensure correct path to your api file
 
 const TaskCard = ({ task, fetchAllTasks, isDarkMode }) => {
     const [isEditing, setIsEditing] = useState(false);
-    const [updatedTask, setUpdatedTask] = useState({
-        title: task.title,
-        description: task.description,
-        deadline: task.deadline,
-        status: task.status,
-        priority: task.priority,
-    });
+    const [updatedTask, setUpdatedTask] = useState({ ...task });
 
     // Helper to get token from localStorage
     const getToken = () => {
@@ -17,7 +11,17 @@ const TaskCard = ({ task, fetchAllTasks, isDarkMode }) => {
         return user?.token || null;
     };
 
-    // Function to handle task deletion
+    // Format date to "Day, Month Year"
+    const formatDate = (isoString) => {
+        const date = new Date(isoString);
+        return date.toLocaleDateString('en-US', {
+            day: '2-digit',
+            month: 'short',
+            year: 'numeric',
+        });
+    };
+
+    // Handle task deletion
     const deleteTask = async () => {
         try {
             const token = getToken();
@@ -29,70 +33,116 @@ const TaskCard = ({ task, fetchAllTasks, isDarkMode }) => {
             alert('Task deleted successfully');
             fetchAllTasks(); // Refresh task list
         } catch (error) {
-            console.error('Failed to delete task:', error.response?.data?.message || error.message);
-            alert('Failed to delete task: ' + (error.response?.data?.message || error.message));
+            console.error('Failed to delete task:', error);
+            alert('Failed to delete task');
         }
     };
 
-    // Function to handle task updates
+    // Handle task updates
     const updateTaskHandler = async () => {
         try {
             const token = getToken();
             if (!token) throw new Error('No token, authorization denied');
 
-            const updatedData = {
-                title: updatedTask.title,
-                description: updatedTask.description,
-                deadline: updatedTask.deadline,
-                status: updatedTask.status,
-                priority: updatedTask.priority,
-            };
-
-            await api.put(`/tasks/${task._id}`, updatedData, {
+            await api.put(`/tasks/${task._id}`, updatedTask, {
                 headers: { Authorization: `Bearer ${token}` },
             });
             alert('Task updated successfully');
             fetchAllTasks(); // Refresh task list
-            setIsEditing(false); // Exit editing mode
+            setIsEditing(false);
         } catch (error) {
-            console.error('Failed to update task:', error.response?.data?.message || error.message);
-            alert('Failed to update task: ' + (error.response?.data?.message || error.message));
+            console.error('Failed to update task:', error);
+            alert('Failed to update task');
         }
     };
 
-    // Handle input changes in the edit form
+    // Handle input changes
     const handleInputChange = (field, value) => {
-        setUpdatedTask((prevTask) => ({ ...prevTask, [field]: value }));
+        setUpdatedTask((prev) => ({ ...prev, [field]: value }));
+    };
+
+    const styles = {
+        card: {
+            border: '1px solid #ccc',
+            padding: '1rem',
+            marginBottom: '1rem',
+            borderRadius: '8px',
+            transition: 'transform 0.3s ease, background-color 0.3s ease',
+            backgroundColor: isDarkMode ? '#333' : '#fff',
+            color: isDarkMode ? '#fff' : '#000',
+        },
+        input: {
+            width: '100%',
+            padding: '10px',
+            marginBottom: '10px',
+            borderRadius: '4px',
+            border: '1px solid #ccc',
+            fontSize: '1rem',
+        },
+        textarea: {
+            width: '100%',
+            padding: '10px',
+            marginBottom: '10px',
+            borderRadius: '4px',
+            border: '1px solid #ccc',
+            fontSize: '1rem',
+            height: '100px',
+        },
+        select: {
+            width: '100%',
+            padding: '10px',
+            marginBottom: '10px',
+            borderRadius: '4px',
+            border: '1px solid #ccc',
+            fontSize: '1rem',
+        },
+        button: {
+            padding: '10px 20px',
+            borderRadius: '4px',
+            border: 'none',
+            cursor: 'pointer',
+            width: '100%',
+            marginTop: '8px',
+        },
+        saveButton: {
+            backgroundColor: 'green',
+            color: '#fff',
+        },
+        cancelButton: {
+            backgroundColor: 'gray',
+            color: '#fff',
+        },
+        deleteButton: {
+            backgroundColor: 'red',
+            color: '#fff',
+        },
+        editButton: {
+            backgroundColor: 'blue',
+            color: '#fff',
+        },
     };
 
     return (
-        <div
-            style={{
-                ...styles.card,
-                backgroundColor: isDarkMode ? '#333' : '#fff',
-                color: isDarkMode ? '#fff' : '#000',
-            }}
-        >
+        <div style={styles.card}>
             {isEditing ? (
-                // Edit Task Form
                 <div>
                     <h3>Edit Task</h3>
                     <input
                         type="text"
                         value={updatedTask.title}
                         onChange={(e) => handleInputChange('title', e.target.value)}
-                        placeholder="Task title"
+                        placeholder="Task Title"
                         style={styles.input}
                     />
                     <textarea
                         value={updatedTask.description}
                         onChange={(e) => handleInputChange('description', e.target.value)}
-                        placeholder="Task description"
+                        placeholder="Task Description"
                         style={styles.textarea}
                     />
                     <input
                         type="date"
-                        value={updatedTask.deadline}
+                        value={updatedTask.deadline.split('T')[0]} // Ensure correct date format
                         onChange={(e) => handleInputChange('deadline', e.target.value)}
                         style={styles.input}
                     />
@@ -113,107 +163,30 @@ const TaskCard = ({ task, fetchAllTasks, isDarkMode }) => {
                         <option value="medium">Medium</option>
                         <option value="high">High</option>
                     </select>
-                    <button onClick={updateTaskHandler} style={styles.saveButton}>
+                    <button onClick={updateTaskHandler} style={{ ...styles.button, ...styles.saveButton }}>
                         Save Changes
                     </button>
-                    <button onClick={() => setIsEditing(false)} style={styles.cancelButton}>
+                    <button onClick={() => setIsEditing(false)} style={{ ...styles.button, ...styles.cancelButton }}>
                         Cancel
                     </button>
                 </div>
             ) : (
-                // Display Task Details
                 <div>
                     <h3>{task.title}</h3>
                     <p>{task.description}</p>
-                    <p><strong>Deadline:</strong> {task.deadline}</p>
+                    <p><strong>Deadline:</strong> {formatDate(task.deadline)}</p>
                     <p><strong>Status:</strong> {task.status}</p>
                     <p><strong>Priority:</strong> {task.priority}</p>
-                    <button onClick={deleteTask} style={styles.deleteButton}>
+                    <button onClick={deleteTask} style={{ ...styles.button, ...styles.deleteButton }}>
                         Delete
                     </button>
-                    <button onClick={() => setIsEditing(true)} style={styles.updateButton}>
-                        Update
+                    <button onClick={() => setIsEditing(true)} style={{ ...styles.button, ...styles.editButton }}>
+                        Edit
                     </button>
                 </div>
             )}
         </div>
     );
-};
-
-// Styles
-const styles = {
-    card: {
-        border: '1px solid #ccc',
-        padding: '1rem',
-        marginBottom: '1rem',
-        borderRadius: '8px',
-        transition: 'transform 0.3s ease, background-color 0.3s ease',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'flex-start',
-    },
-    input: {
-        width: '100%',
-        padding: '10px',
-        marginBottom: '10px',
-        borderRadius: '4px',
-        border: '1px solid #ccc',
-        fontSize: '1rem',
-    },
-    textarea: {
-        width: '100%',
-        padding: '10px',
-        marginBottom: '10px',
-        borderRadius: '4px',
-        border: '1px solid #ccc',
-        fontSize: '1rem',
-        height: '100px',
-    },
-    select: {
-        width: '100%',
-        padding: '10px',
-        marginBottom: '10px',
-        borderRadius: '4px',
-        border: '1px solid #ccc',
-        fontSize: '1rem',
-    },
-    saveButton: {
-        padding: '10px 20px',
-        backgroundColor: 'green',
-        color: '#fff',
-        border: 'none',
-        borderRadius: '4px',
-        cursor: 'pointer',
-        width: '100%',
-    },
-    cancelButton: {
-        padding: '10px 20px',
-        backgroundColor: 'gray',
-        color: '#fff',
-        border: 'none',
-        borderRadius: '4px',
-        cursor: 'pointer',
-        width: '100%',
-    },
-    deleteButton: {
-        backgroundColor: 'red',
-        color: '#fff',
-        padding: '10px 20px',
-        borderRadius: '4px',
-        border: 'none',
-        cursor: 'pointer',
-        marginRight: '10px',
-        width: '100%',
-    },
-    updateButton: {
-        backgroundColor: 'blue',
-        color: '#fff',
-        padding: '10px 20px',
-        borderRadius: '4px',
-        border: 'none',
-        cursor: 'pointer',
-        width: '100%',
-    },
 };
 
 export default TaskCard;

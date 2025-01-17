@@ -3,9 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import TaskCard from '../components/TaskCard';
 
-
 const HomePage = () => {
     const [tasks, setTasks] = useState([]);
+    const [filteredTasks, setFilteredTasks] = useState([]);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [filterStatus, setFilterStatus] = useState('');
+    const [sortCriteria, setSortCriteria] = useState('');
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const navigate = useNavigate();
@@ -23,6 +26,7 @@ const HomePage = () => {
                 headers: { Authorization: `Bearer ${token}` },
             });
             setTasks(response.data);
+            setFilteredTasks(response.data); // Initialize filtered tasks
         } catch (err) {
             setError(err.message);
         } finally {
@@ -33,6 +37,37 @@ const HomePage = () => {
     useEffect(() => {
         fetchAllTasks();
     }, []);
+
+    // Filter tasks by search term and status
+    useEffect(() => {
+        let filtered = tasks;
+
+        if (searchTerm) {
+            filtered = filtered.filter(
+                (task) =>
+                    task.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    task.description.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+        }
+
+        if (filterStatus) {
+            filtered = filtered.filter((task) => task.status === filterStatus);
+        }
+
+        if (sortCriteria) {
+            filtered = [...filtered].sort((a, b) => {
+                if (sortCriteria === 'deadline') {
+                    return new Date(a.deadline) - new Date(b.deadline);
+                }
+                if (sortCriteria === 'priority') {
+                    return b.priority - a.priority; // Assuming priority is a number
+                }
+                return 0;
+            });
+        }
+
+        setFilteredTasks(filtered);
+    }, [searchTerm, filterStatus, sortCriteria, tasks]);
 
     const handleAddTaskClick = () => {
         navigate('/add-task'); // Redirect to add-task page
@@ -48,6 +83,36 @@ const HomePage = () => {
             alignItems: 'center',
         }}>
             <h1 style={{ textAlign: 'center', marginBottom: '1rem' }}>Task Management</h1>
+            
+            {/* Search, Filter, and Sort Controls */}
+            <div style={{ marginBottom: '1rem', display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+                <input
+                    type="text"
+                    placeholder="Search tasks..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    style={{ padding: '0.5rem', borderRadius: '5px', border: '1px solid #ccc' }}
+                />
+                <select
+                    value={filterStatus}
+                    onChange={(e) => setFilterStatus(e.target.value)}
+                    style={{ padding: '0.5rem', borderRadius: '5px', border: '1px solid #ccc' }}
+                >
+                    <option value="">All Statuses</option>
+                    <option value="completed">Completed</option>
+                    <option value="in progress">In Progress</option>
+                </select>
+                <select
+                    value={sortCriteria}
+                    onChange={(e) => setSortCriteria(e.target.value)}
+                    style={{ padding: '0.5rem', borderRadius: '5px', border: '1px solid #ccc' }}
+                >
+                    <option value="">Sort By</option>
+                    <option value="deadline">Deadline</option>
+                    <option value="priority">Priority</option>
+                </select>
+            </div>
+
             <button
                 onClick={handleAddTaskClick}
                 style={{
@@ -64,11 +129,32 @@ const HomePage = () => {
             </button>
 
             {loading ? (
-                <p>Loading tasks...</p>
+                // Spinner while loading
+                <div style={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    height: '200px',
+                }}>
+                    <div style={{
+                        border: '4px solid rgba(0, 0, 0, 0.1)',
+                        width: '36px',
+                        height: '36px',
+                        borderRadius: '50%',
+                        borderLeftColor: '#007BFF',
+                        animation: 'spin 1s linear infinite',
+                    }} />
+                    <style>
+                        {`@keyframes spin {
+                            0% { transform: rotate(0deg); }
+                            100% { transform: rotate(360deg); }
+                        }`}
+                    </style>
+                </div>
             ) : error ? (
                 <p style={{ color: 'red' }}>{error}</p>
-            ) : tasks.length === 0 ? (
-                <p>No tasks found. Click "Add Task" to create one.</p>
+            ) : filteredTasks.length === 0 ? (
+                <p>No tasks found. Adjust your filters or search criteria.</p>
             ) : (
                 <div style={{
                     display: 'grid',
@@ -76,7 +162,7 @@ const HomePage = () => {
                     gap: '1rem',
                     width: '100%',
                 }}>
-                    {tasks.map((task) => (
+                    {filteredTasks.map((task) => (
                         <TaskCard key={task._id} task={task} fetchAllTasks={fetchAllTasks} />
                     ))}
                 </div>
