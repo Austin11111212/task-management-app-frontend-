@@ -10,6 +10,7 @@ const AddTaskPage = () => {
         priority: 'low',
     });
     const [error, setError] = useState(null);
+    const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
 
     const handleChange = (e) => {
@@ -18,12 +19,21 @@ const AddTaskPage = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setIsLoading(true);
+        setError(null); // Reset error before submitting
         try {
             const user = JSON.parse(localStorage.getItem('user'));
             const token = user?.token;
 
             if (!token) {
-                throw new Error('Unauthorized. Please log in again.');
+                navigate('/login');
+                return;
+            }
+
+            if (new Date(taskData.deadline) < new Date()) {
+                setError('Deadline cannot be in the past.');
+                setIsLoading(false);
+                return;
             }
 
             await api.post('/tasks', taskData, {
@@ -31,10 +41,22 @@ const AddTaskPage = () => {
             });
 
             alert('Task added successfully!');
+            setTaskData({
+                title: '',
+                description: '',
+                deadline: '',
+                priority: 'low',
+            });
             navigate('/'); // Navigate back to the homepage
         } catch (err) {
-            setError(err.response?.data?.message || err.message);
+            setError(err.response?.data?.message || err.message || 'An unexpected error occurred.');
+        } finally {
+            setIsLoading(false);
         }
+    };
+
+    const handleCancel = () => {
+        navigate('/'); // Navigate back to the homepage without submitting
     };
 
     return (
@@ -85,6 +107,26 @@ const AddTaskPage = () => {
                         font-size: 1rem;
                     }
 
+                    .submit-button:disabled {
+                        background-color: #d6d6d6;
+                        cursor: not-allowed;
+                    }
+
+                    .cancel-button {
+                        background-color: #6c757d;
+                        color: #fff;
+                        padding: 0.75rem 1.5rem;
+                        border: none;
+                        border-radius: 5px;
+                        cursor: pointer;
+                        font-size: 1rem;
+                        margin-top: 1rem;
+                    }
+
+                    .cancel-button:hover {
+                        background-color: #5a6268;
+                    }
+
                     .error-message {
                         color: red;
                         font-size: 1rem;
@@ -104,7 +146,8 @@ const AddTaskPage = () => {
                             font-size: 0.875rem;
                         }
 
-                        .submit-button {
+                        .submit-button,
+                        .cancel-button {
                             padding: 0.5rem 1rem;
                             font-size: 0.875rem;
                         }
@@ -159,8 +202,11 @@ const AddTaskPage = () => {
                     </select>
                 </div>
                 {error && <p className="error-message">{error}</p>}
-                <button type="submit" className="submit-button">
-                    Add Task
+                <button type="submit" className="submit-button" disabled={isLoading}>
+                    {isLoading ? 'Adding...' : 'Add Task'}
+                </button>
+                <button type="button" className="cancel-button" onClick={handleCancel}>
+                    Cancel
                 </button>
             </form>
         </div>
