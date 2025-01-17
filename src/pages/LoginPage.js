@@ -83,7 +83,7 @@ const LoginPage = () => {
         passwordIcon: {
             position: 'absolute',
             right: '10px',
-            top: '50%',
+            bottom: '-10%', // Adjusted from '50%' to '55%' to shift it down
             transform: 'translateY(-50%)',
             cursor: 'pointer',
             color: '#888',
